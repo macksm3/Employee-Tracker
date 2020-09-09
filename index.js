@@ -46,7 +46,7 @@ function start() {
       ]
     })
     .then(function(answer) {
-      console.log(answer);
+      // console.log(answer);
       if (answer.first_choice === `View All Employees`) {
         viewAllEmployees();
       }
@@ -58,7 +58,6 @@ function start() {
         viewByManager();
       }
       else if (answer.first_choice === `Add Employee`) {
-        console.log(`insert into employee`);
         addEmployee();
       }
       else if (answer.first_choice === `Update Employee Role`) {
@@ -86,8 +85,7 @@ function start() {
 function viewAllEmployees() {
   // return new Promise((resolve, reject) => {});
 
-  console.log(`query employee`);
-  // inquirer .prompt({}) .then({});
+  console.log(`View All Employees`);
   connection.query(`SELECT * FROM employee`, function(err, results) {
     if (err) throw err; 
     console.table(results);
@@ -97,9 +95,9 @@ function viewAllEmployees() {
 }
 
 function viewByDeptarment() {
-  console.log(`query departments`);
+  console.log(`View Employees By Department`);
   // inquirer .prompt({}) .then({});
-  connection.query(`SELECT * FROM employee GROUB BY departments`, function(err, results) {
+  connection.query(`SELECT * FROM employee GROUB BY department_id`, function(err, results) {
     if (err) throw err; 
     console.log(results);
   } );
@@ -107,9 +105,9 @@ function viewByDeptarment() {
 }
 
 function viewByManager() {
-  console.log(`insert into departments`);
+  console.log(`View Employees By Manager`);
   // inquirer .prompt({}) .then({});
-  connection.query(`SELECT * FROM employee GROUB BY manager`, function(err, results) {
+  connection.query(`SELECT * FROM employee GROUB BY manager_id`, function(err, results) {
     if (err) throw err; 
     console.log(results);
   } );
@@ -117,44 +115,61 @@ function viewByManager() {
 }
 
 function addEmployee() {
-  inquirer 
-  .prompt([
-    {
-      name: 'first_name',
-      type: 'input',
-      message: `what is the employee's first name?`
-    },
-    {
-      name: 'last_name',
-      type: 'input',
-      message: `what is your employee's last name?`
-    }
-  ]) 
-  .then( (answer) => {
-    connection.query(
-      'INSERT INTO employee SET ?',
-      {
-        first_name: answer.first_name,
-        last_name: answer.last_name,
-        role_id: 1
-      },
-      function(err) {
-        if(err) throw err;
-        console.log(`employee name entered successful`)
-        start();
-      }
-    );
+  console.log(`Add Employee`);
+  connection.query(`SELECT * FROM role`, function(err, role_res) {
+    if (err) throw err; 
+    console.table(role_res);
+    inquirer 
+      .prompt([
+        {
+          name: 'first_name',
+          type: 'input',
+          message: `what is the employee's first name?`
+        },
+        {
+          name: 'last_name',
+          type: 'input',
+          message: `what is the employee's last name?`
+        },
+        {
+          name: 'role_id',
+          type: 'list',
+          choices: function() {
+            const roleList = [];
+            role_res.forEach( (i) => {
+              roleList.push(i.title);
+            });
+            return roleList;
+          },
+          message: `what is the employee's role?`
+        }
+      ]) 
+      .then( (answer) => {
+        let roleID = "";
+        role_res.forEach( (i) => {
+          if(i.title === answer.role_id) {
+            roleID = i.id;
+          }
+        });
+        connection.query(
+          'INSERT INTO employee SET ?',
+          {
+            first_name: answer.first_name,
+            last_name: answer.last_name,
+            role_id: roleID
+          },
+          function(err) {
+            if(err) throw err;
+            console.log(`employee name entered successful`)
+            start();
+          }
+        );
+      });
   });
-
 }
 
-function insertIntoEmployee() {inquirer .prompt({}) .then({});}
 
 function updateEmployeeRole() {inquirer .prompt({}) .then({});}
-
-
-function insertIntoDepartments() {inquirer .prompt({}) .then({});}
-
 
 
 function viewRoles() {
@@ -168,34 +183,60 @@ function viewRoles() {
 
 function addNewRole() {
   console.log(`Add New Job Role`);
-  inquirer 
-  .prompt([
-    {
-      name: 'title',
-      type: 'input',
-      message: `whaty is the name of the new role?`
-    },
-    {
-      name: 'salery',
-      type: 'input',
-      message: `what is the salery of the new role`
-    }
-    ]) 
-  .then( (answer) => {
-    connection.query(
-      'INSERT INTO role SET ?',
-      {
-        title: answer.title,
-        salery: answer.salery,
-        department_id: 1
-      },
-      function(err) {
-        if(err) throw err;
-        console.log(`role entered successful`)
-        start();
-      }
-    );
+  connection.query(`SELECT * FROM departments`, function(err, results) {
+    if (err) throw err; 
+    // console.table(results);
+    inquirer 
+      .prompt([
+        {
+          name: 'title',
+          type: 'input',
+          message: `whaty is the name of the new role?`
+        },
+        {
+          name: 'salery',
+          type: 'input',
+          message: `what is the salery of the new role`
+        },
+        {
+          name: 'department_id',
+          type: 'list',
+          choices: function() {
+            const deptList =[];
+            // for (let i = 0; i < results.length; i++) {
+            results.forEach( (i) => {
+              // console.log(results[i].dept_name);
+              deptList.push(i.dept_name);
+            });
+            return deptList;
+          },
+          message: `what department is the new role in?`
+        }
+      ]) 
+      .then( (answer) => {
+        // parse out department id here
+        let deptID = "";
+        results.forEach( (i) => {
+          if(i.dept_name === answer.department_id) {
+            deptID = i.id;
+          }
+        });
+        
+        connection.query(
+          'INSERT INTO role SET ?',
+          {
+            title: answer.title,
+            salery: answer.salery,
+            department_id: deptID
+          },
+          function(err) {
+            if(err) throw err;
+            console.log(`role entered successful`)
+            start();
+          }
+        );
 
+      });
   });
 }
 
