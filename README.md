@@ -4,6 +4,7 @@ homework 12
   Using CLI to manage an employee database based on inquirer prompt input.
   User can view departments, roles and employees, add new departments, roles and employees and update employee roles. 
   Modules used include inquirer, mysql and console.table.
+  sql files included to build and seed database starting point. 
   
   ## Table of Contents 
   
