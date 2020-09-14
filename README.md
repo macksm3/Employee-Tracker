@@ -5,6 +5,9 @@ homework 12
   User can view departments, roles and employees, add new departments, roles and employees and update employee roles. 
   Modules used include inquirer, mysql and console.table.
   sql files included to build and seed database starting point. 
+
+  Find the app at https://github.com/macksm3/Employee-Tracker
+  
   
   ## Table of Contents 
   
